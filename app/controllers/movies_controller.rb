@@ -11,15 +11,32 @@ class MoviesController < ApplicationController
   end
 
   def index
+    # if @current_page?(@root)
+    #   @movies = Movie.all
+    # end
+    # @movies = Movie.all
+
+    # get the sorted unique possible values of ratings
+    @all_ratings = Movie.all_ratings
+
+    if params.include?(:ratings)
+      @selected_ratings = params[:ratings].keys
+    elsif !@selected_ratings
+      @selected_ratings = @all_ratings
+    end
+
+    selected_movies = Movie.where(rating: @selected_ratings)
+
     if params[:sort] == "title"
-      @movies = Movie.order("title")
-      @hilite = "title"
+      @movies = selected_movies.order("title")
+      @title_class = "hilite"
+      @release_date_class = nil
     elsif params[:sort] == "release_date"
-      @movies = Movie.order("release_date")
-      @hilite = "release_date"
+      @movies = selected_movies.order("release_date")
+      @title_class = nil
+      @release_date_class = "hilite"
     else
-      @movies = Movie.all
-      @hilite = ""
+      @movies = selected_movies
     end
   end
 
