@@ -11,30 +11,29 @@ class MoviesController < ApplicationController
   end
 
   def index
-    # if @current_page?(@root)
-    #   @movies = Movie.all
-    # end
-    # @movies = Movie.all
-
     # get the sorted unique possible values of ratings
     @all_ratings = Movie.all_ratings
 
-    if params.include?(:ratings)
-      @selected_ratings = params[:ratings].keys
-    elsif !@selected_ratings
-      @selected_ratings = @all_ratings
+    if params[:ratings]
+      session[:ratings] = params[:ratings]
+    elsif session[:ratings] == nil
+      session[:ratings] = Hash[@all_ratings.collect { |v| [v, 1] }]
     end
 
-    selected_movies = Movie.where(rating: @selected_ratings)
+    if params[:sort]
+      session[:sort] = params[:sort]
+    end
+
+    selected_movies = Movie.where(rating: session[:selected_ratings])
 
     if params[:sort] == "title"
       @movies = selected_movies.order("title")
-      @title_class = "hilite"
-      @release_date_class = nil
+      session[:title_class] = "hilite"
+      session[:release_date_class] = nil
     elsif params[:sort] == "release_date"
       @movies = selected_movies.order("release_date")
-      @title_class = nil
-      @release_date_class = "hilite"
+      session[:title_class] = nil
+      session[:release_date_class] = "hilite"
     else
       @movies = selected_movies
     end
@@ -62,10 +61,15 @@ class MoviesController < ApplicationController
   end
 
   def destroy
-    @movie = Movie.find(params[:id])
+    @movie = Movie.fi nd(params[:id])
     @movie.destroy
     flash[:notice] = "Movie '#{@movie.title}' deleted."
     redirect_to movies_path
+  end
+
+  def reset
+    reset_session
+    redirect_to root_path
   end
 
 end
