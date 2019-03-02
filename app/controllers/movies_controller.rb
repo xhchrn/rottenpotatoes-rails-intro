@@ -15,16 +15,16 @@ class MoviesController < ApplicationController
     @all_ratings = Movie.all_ratings
 
     if params[:ratings]
-      session[:ratings] = params[:ratings]
+      session[:ratings] = params[:ratings].keys
     elsif session[:ratings] == nil
-      session[:ratings] = Hash[@all_ratings.collect { |v| [v, 1] }]
+      session[:ratings] = @all_ratings
     end
 
     if params[:sort]
       session[:sort] = params[:sort]
     end
 
-    selected_movies = Movie.where(rating: session[:selected_ratings])
+    selected_movies = Movie.where(rating: session[:ratings])
 
     if params[:sort] == "title"
       @movies = selected_movies.order("title")
